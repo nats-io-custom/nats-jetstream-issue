@@ -24,6 +24,8 @@ const (
 
 type (
 	commandInputs struct {
+		DurationT           string
+		PauseDurationT      string
 		Subject             string
 		MessageJsonTemplate string
 	}
@@ -39,6 +41,8 @@ var (
 	appCommandInputs = commandInputs{
 		Subject:             "",
 		MessageJsonTemplate: messageJsonTemplate,
+		DurationT:           "0s",
+		PauseDurationT:      "1s",
 	}
 )
 
@@ -58,9 +62,10 @@ func Init(parentCmd *cobra.Command) {
 			builder := di.Builder()
 			di.AddInstance[*contracts_nats.NATSConnConfig](builder,
 				&contracts_nats.NATSConnConfig{
-					Username: appInputs.NatsUser,
-					Password: appInputs.NatsPass,
-					NatsUrl:  appInputs.NatsUrl,
+					Username:      appInputs.NatsUser,
+					Password:      appInputs.NatsPass,
+					NatsUrl:       appInputs.NatsUrl,
+					SentinelCreds: appInputs.SentinelCreds,
 				})
 			shared.AddCommonServices(builder, serviceName)
 			ctn := builder.Build()
@@ -84,22 +89,40 @@ func Init(parentCmd *cobra.Command) {
 				printer.Errorf("Error creating JetStream context: %v", err)
 				return err
 			}
-
-			sequence := 0
-			timestamp := time.Now().Format(time.RFC3339)
-			mm := appCommandInputs.MessageJsonTemplate
-			mm = strings.ReplaceAll(mm, "$timestamp", timestamp)
-			mm = strings.ReplaceAll(mm, "$sequence", fmt.Sprintf("%d", sequence))
-
-			_, err = js.Publish(ctx, appCommandInputs.Subject, []byte(mm),
-				nats_jetstream.WithRetryWait(time.Second*5),
-				nats_jetstream.WithRetryAttempts(100))
-
+			durataion, err := time.ParseDuration(appCommandInputs.DurationT)
 			if err != nil {
-				log.Error().Err(err).Msg("failed to publish message")
+				log.Error().Err(err).Msg("failed to parse duration")
+				return err
+			}
+			pauseDuration, err := time.ParseDuration(appCommandInputs.PauseDurationT)
+			if err != nil {
+				log.Error().Err(err).Msg("failed to parse pause duration")
+				return err
+			}
+			sequence := 0
+			startTime := time.Now()
+			for {
+				timestamp := time.Now().Format(time.RFC3339)
+				mm := appCommandInputs.MessageJsonTemplate
+				mm = strings.ReplaceAll(mm, "$timestamp", timestamp)
+				mm = strings.ReplaceAll(mm, "$sequence", fmt.Sprintf("%d", sequence))
 
-			} else {
-				log.Info().Msg(fmt.Sprintf("published message %d", sequence))
+				_, err = js.Publish(ctx, appCommandInputs.Subject, []byte(mm),
+					nats_jetstream.WithRetryWait(time.Second*5),
+					nats_jetstream.WithRetryAttempts(100))
+
+				if err != nil {
+					log.Error().Err(err).Msg("failed to publish message")
+
+				} else {
+					log.Info().Msg(fmt.Sprintf("published message %d", sequence))
+				}
+				sequence++
+				time.Sleep(pauseDuration)
+				if time.Since(startTime) > durataion {
+					break
+				}
+
 			}
 
 			//printer.Printf(cobra_utils.Green, "published %d messages\n", sequence+1)
@@ -120,6 +143,16 @@ func Init(parentCmd *cobra.Command) {
 	flagName = "message.json.template"
 	defaultS = appCommandInputs.MessageJsonTemplate
 	command.Flags().StringVar(&appCommandInputs.MessageJsonTemplate, flagName, defaultS, fmt.Sprintf("[required] i.e. --%s=%s", flagName, defaultS))
+	viper.BindPFlag(flagName, command.PersistentFlags().Lookup(flagName))
+
+	flagName = "duration"
+	defaultS = appCommandInputs.DurationT
+	command.Flags().StringVar(&appCommandInputs.DurationT, flagName, defaultS, fmt.Sprintf("[required] i.e. --%s=%s", flagName, defaultS))
+	viper.BindPFlag(flagName, command.PersistentFlags().Lookup(flagName))
+
+	flagName = "pause.duration"
+	defaultS = appCommandInputs.PauseDurationT
+	command.Flags().StringVar(&appCommandInputs.PauseDurationT, flagName, defaultS, fmt.Sprintf("[required] i.e. --%s=%s", flagName, defaultS))
 	viper.BindPFlag(flagName, command.PersistentFlags().Lookup(flagName))
 
 	parentCmd.AddCommand(command)

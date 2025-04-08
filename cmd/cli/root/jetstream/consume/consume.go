@@ -51,9 +51,10 @@ func Init(parentCmd *cobra.Command) {
 			builder := di.Builder()
 			di.AddInstance[*contracts_nats.NATSConnConfig](builder,
 				&contracts_nats.NATSConnConfig{
-					Username: appInputs.NatsUser,
-					Password: appInputs.NatsPass,
-					NatsUrl:  appInputs.NatsUrl,
+					Username:      appInputs.NatsUser,
+					Password:      appInputs.NatsPass,
+					NatsUrl:       appInputs.NatsUrl,
+					SentinelCreds: appInputs.SentinelCreds,
 				})
 			shared.AddCommonServices(builder, serviceName)
 			ctn := builder.Build()

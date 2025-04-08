@@ -48,16 +48,22 @@ func GetContext() context.Context {
 }
 
 type Inputs struct {
-	NatsUrl         string   `json:"natsUrl"`
-	NatsCreds       string   `json:"natsCreds"`
-	IssuerSeed      string   `json:"issuerSeed"`
-	NatsUser        string   `json:"natsUser"`
-	NatsPass        string   `json:"natsPass"`
-	XKeySeed        string   `json:"xkeySeed"`
-	SigningKeyFiles []string `json:"signingKeyFiles"`
-	UsersFile       string   `json:"usersFile"`
-	OperatorKeyFile string   `json:"operatorKeyFile"`
-	SysCredsFile    string   `json:"sysCredsFile"`
+	NatsUrl               string   `json:"natsUrl"`
+	NatsCreds             string   `json:"natsCreds"`
+	IssuerSeed            string   `json:"issuerSeed"`
+	NatsUser              string   `json:"natsUser"`
+	NatsPass              string   `json:"natsPass"`
+	XKeySeed              string   `json:"xkeySeed"`
+	SigningKeyFiles       []string `json:"signingKeyFiles"`
+	UsersFile             string   `json:"usersFile"`
+	OperatorKeyFile       string   `json:"operatorKeyFile"`
+	SysCredsFile          string   `json:"sysCredsFile"`
+	OperatorNKeyFile      string   `json:"operatorNKeyFile"`
+	CalloutIssuerNKeyFile string   `json:"calloutIssuerNKeyFile"`
+	AuthAccountJWTFile    string   `json:"authAccountJWTFile"`
+	SystemAccountJWTFile  string   `json:"systemAccountJWTFile"`
+	CalloutCreds          string   `json:"calloutCreds"`
+	SentinelCreds         string   `json:"sentinelCreds"`
 }
 
 func NewInputs() *Inputs {
@@ -82,6 +88,11 @@ func InitCommonConnFlags(input *Inputs, command *cobra.Command) {
 	command.Flags().StringVar(&input.NatsPass, flagName, defaultS, fmt.Sprintf("[required] i.e. --%s=%s", flagName, defaultS))
 	viper.BindPFlag(flagName, command.PersistentFlags().Lookup(flagName))
 
+	flagName = "sentinel.creds"
+	defaultS = input.SentinelCreds
+	command.Flags().StringVar(&input.SentinelCreds, flagName, defaultS, fmt.Sprintf("[required] i.e. --%s=%s", flagName, defaultS))
+	viper.BindPFlag(flagName, command.PersistentFlags().Lookup(flagName))
+
 }
 
 func (appInputs *Inputs) MakeConn(ctx context.Context) (*nats.Conn, error) {
@@ -103,6 +114,14 @@ func (appInputs *Inputs) MakeConn(ctx context.Context) (*nats.Conn, error) {
 		return nil, status.Error(codes.InvalidArgument, "nats pass is required")
 	}
 	opts = append(opts, nats.UserInfo(appInputs.NatsUser, appInputs.NatsPass))
+
+	if fluffycore_utils.IsNotEmptyOrNil(appInputs.SentinelCreds) {
+		if !FileExists(appInputs.SentinelCreds) {
+			log.Error().Msgf("sentinel creds file does not exist: %s", appInputs.SentinelCreds)
+			return nil, status.Error(codes.NotFound, fmt.Sprintf("sentinel creds file does not exist: %s", appInputs.SentinelCreds))
+		}
+		opts = append(opts, nats.UserCredentials(appInputs.SentinelCreds))
+	}
 
 	nc, err := nats.Connect(
 		appInputs.NatsUrl,

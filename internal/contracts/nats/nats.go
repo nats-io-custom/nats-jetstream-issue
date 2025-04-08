@@ -9,9 +9,10 @@ import (
 
 type (
 	NATSConnConfig struct {
-		NatsUrl  string
-		Username string
-		Password string
+		NatsUrl       string
+		Username      string
+		Password      string
+		SentinelCreds string
 	}
 	INATSConnection interface {
 		Conn(ctx context.Context) (*nats_go.Conn, error)

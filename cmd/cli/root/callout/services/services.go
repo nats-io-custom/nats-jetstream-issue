@@ -1,10 +1,10 @@
 package services
 
 import (
-	cobra_utils "github.com/nats-io-custom/nats-jetstream-issue/internal/cobra_utils"
-
+	callout_services_operator_mode_url_resolver "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/callout/services/operator_mode_url_resolver"
 	callout_services_static "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/callout/services/static"
-
+	callout_services_url_resolver "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/callout/services/url_resolver"
+	cobra_utils "github.com/nats-io-custom/nats-jetstream-issue/internal/cobra_utils"
 	cobra "github.com/spf13/cobra"
 )
 
@@ -19,6 +19,8 @@ func Init(parentCmd *cobra.Command) {
 	}
 
 	callout_services_static.Init(command)
+	callout_services_url_resolver.Init(command)
+	callout_services_operator_mode_url_resolver.Init(command)
 
 	parentCmd.AddCommand(command)
 

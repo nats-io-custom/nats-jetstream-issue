@@ -1,8 +1,7 @@
 services:
   # Internal NATS server.
   server:
-    #image: nats:2.11.0
-    image: ghstahl/nats:sha-7f3c1bc5
+    image: nats:2.11.0
     command:
       -n internal-server
       -m 8222
@@ -12,7 +11,7 @@ services:
     environment:
       - SERVER_NAME=nats
     volumes:
-      - ./configs/static_callout.conf:/server.conf
+      - ./configs/dynamic_accounts_url_resolver/server.url.resolver.conf:/server.conf
     ports:
       - "4222:4222" # Map host port 4222 to container port 4222
       - "8222:8222" # Monitoring port

@@ -19,7 +19,7 @@ go build .\cmd\cli\.
 ### Attach Request Listener
 
 ```bash
-.\cli.exe handlers request --nats.user god@SVC --nats.pass god
+.\cli.exe handlers request --nats.user god@svc --nats.pass god
 ```
 
 ### Send a request/reply
@@ -33,27 +33,29 @@ go build .\cmd\cli\.
 ### Create a stream config
 
 ```bash
-.\cli.exe jetstream create --js.name my_stream --js.subject my_stream.a --js.subject my_stream.a.>  --nats.user god@svc --nats.pass god
+.\cli.exe jetstream create --js.name my_stream --js.subject my_stream.a --js.subject my_stream.a.>  --nats.user god@svc --nats.pass god --sentinel.creds .\configs\dynamic_accounts_url_resolver\sentinel.creds
 
-.\cli.exe jetstream info --js.name my_stream --nats.user god@svc --nats.pass god
+.\cli.exe jetstream info --js.name my_stream --nats.user god@svc --nats.pass god --sentinel.creds .\configs\dynamic_accounts_url_resolver\sentinel.creds
 ```
 
 ### Create a stream consumer config
 
 ```bash
-.\cli.exe jetstream consumer add --js.name my_stream --consumer.name con_my_stream --consumer.filterSubjects my_stream.a.b --nats.user god@svc --nats.pass god
+.\cli.exe jetstream consumer add --js.name my_stream --consumer.name con_my_stream --consumer.filterSubjects my_stream.a.b --nats.user god@svc --nats.pass god --sentinel.creds .\configs\dynamic_accounts_url_resolver\sentinel.creds
 
-.\cli.exe jetstream consumer info --js.name my_stream --consumer.name con_my_stream --nats.user god@svc --nats.pass god
+.\cli.exe jetstream consumer info --js.name my_stream --consumer.name con_my_stream --nats.user god@svc --nats.pass god --sentinel.creds .\configs\dynamic_accounts_url_resolver\sentinel.creds
 ```
 
 ### Start up a consumer
 
 ```bash
-.\cli.exe jetstream consume --js.name my_stream --consumer.name con_my_stream --nats.user god@svc --nats.pass god   
+.\cli.exe jetstream consume --js.name my_stream --consumer.name con_my_stream --nats.user god@svc --nats.pass god   --nats.pass god --sentinel.creds .\configs\dynamic_accounts_url_resolver\sentinel.creds
+
 ```
 
 ### Publish a message to the stream
 
 ```bash
-.\cli.exe jetstream publish_one --subject my_stream.a.b 
+.\cli.exe jetstream publish_one --subject my_stream.a.b --nats.pass god --sentinel.creds .\configs\dynamic_accounts_url_resolver\sentinel.creds
+
 ```

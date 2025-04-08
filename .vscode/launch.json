@@ -141,8 +141,66 @@
  
 
              ]    
+        },
+        {
+            "name": "callout/services/url_resolver",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "callout", "services","url_resolver",
+                "--operator.nk", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/operator.nk",
+                "--auth.account.jwt", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/auth.account.jwt",
+                "--system.account.jwt", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/system.account.jwt",
+             ]    
+        },
+        {
+            "name": "callout/services/operator_mode_url_resolver",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "callout", "services","operator_mode_url_resolver",
+                "--users.file", "${workspaceFolder}/configs/users.json",
+                "--callout.creds", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/service.creds",
+                "--callout.issuer.nk", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/C.nk",
+              ]    
+        },
+        {
+            "name": "jetstream/consume with creds",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream", "consume", 
+                "--js.name","my_stream", 
+                "--consumer.name","con_my_stream", 
+                "--nats.user","god@sg","--nats.pass","god",                
+                "--sentinel.creds", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/sentinel.creds",
+              ]    
+        },
+        {
+            "name": "jetstream/publish_one with creds",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream", "publish_one", 
+                "--nats.user","god@sg","--nats.pass","god",                
+                "--sentinel.creds", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/sentinel.creds",
+                "--subject","my_stream.a.b",
+              ]    
         }
 
 
     ]
 }
+ 
