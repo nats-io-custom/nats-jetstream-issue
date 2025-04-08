@@ -1,0 +1,98 @@
+{
+  "users": [
+    {
+      "username": "god",
+      "password": "god",
+      "allowedAccounts": [
+        "*"
+      ],
+      "sub": {
+        "allow": [
+          ">"
+        ],
+        "deny": []
+      },
+      "pub": {
+        "allow": [
+          ">"
+        ],
+        "deny": []
+      }
+    },
+    {
+      "username": "greeter",
+      "password": "greeter",
+      "allowedAccounts": [
+        "SVC",
+        "google"
+      ],
+      "sub": {
+        "allow": [
+          "_INBOX.>",
+          "greet.*",
+          "$SRV.INFO",
+          "$SRV.INFO.EchoService",
+          "$SRV.INFO.EchoService.>",
+          "$SRV.PING",
+          "$SRV.PING.EchoService",
+          "$SRV.PING.EchoService.>",
+          "$SRV.STATS",
+          "$SRV.STATS.EchoService",
+          "$SRV.STATS.EchoService.>"
+        ],
+        "deny": []
+      },
+      "pub": {
+        "allow": [
+          "_INBOX.>",
+          "greet.*.>"
+        ],
+        "deny": []
+      }
+    },
+    {
+      "username": "alice",
+      "password": "alice",
+      "allowedAccounts": [
+        "SVC",
+        "microsoft"
+      ],
+      "sub": {
+        "allow": [
+          "_INBOX.>",
+          "greet.alice",
+          "greet.alice.reply"
+        ],
+        "deny": []
+      },
+      "pub": {
+        "allow": [
+          "greet.alice"
+        ],
+        "deny": []
+      }
+    },
+    {
+      "username": "joe",
+      "password": "joe",
+      "allowedAccounts": [
+        "SVC",
+        "github"
+      ],
+      "sub": {
+        "allow": [
+          "_INBOX.>",
+          "greet.joe",
+          "greet.joe.reply"
+        ],
+        "deny": []
+      },
+      "pub": {
+        "allow": [
+          "greet.joe"
+        ],
+        "deny": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,206 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "callout/services/static",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "callout", "services","static",
+                "--users.file", "${workspaceFolder}/configs/users.json",
+
+             ]    
+        },
+        {
+            "name": "handlers/request",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "handlers", "request",
+               
+
+             ]    
+        }, {
+            "name": "clients/micro/request",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "clients","micro", "request",
+               "--nats.user","joe","--nats.pass","joe","--request.subject","greet.joe",
+               "--request.duration","1m"
+
+             ]    
+        }, {
+            "name": "jetstream/publish",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream","publish",
+               "--nats.user","god","--nats.pass","god",
+               "--subject","webhooks.inbound.github",
+               "--duration","10s"
+
+             ]    
+        }, {
+            "name": "jetstream/kv/bucket/put",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream","kv","bucket","put",
+               "--nats.user","god","--nats.pass","god",
+               "--kv.bucket","kvBucket_workflow",
+               "--kv.entry.key","a",
+               "--kv.entry.value","b",
+ 
+             ]    
+        }, {
+            "name": "jetstream/kv/bucket/get",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream","kv","bucket","get",
+                "--kv.bucket","kvBucket_workflow",
+                "--nats.user","god","--nats.pass","god",
+                "--kv.entry.key","a",
+  
+             ]    
+        },
+        {
+            "name": "callout/services/static/and_dynamic",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "callout", "services","static", "and_dynamic",
+                "--users.file", "${workspaceFolder}/configs/users.json",
+
+             ]    
+        },{
+            "name": "jetstream/publish - org123",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream","publish",
+               "--nats.user","god@sg","--nats.pass","god",
+               "--subject","org1234.write.props.github",
+               "--duration","0s",
+               "--pause.duration","10ms"
+
+             ]    
+        },{
+            "name": "jetstream/consume - write_scatter_gather",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream","consume",
+               "--nats.user","god@sg","--nats.pass","god",
+               "--js.name","write_scatter_gather",
+               "--consumer.name","middleware_write_props",
+ 
+             ]    
+        },{
+            "name": "jetstream/publish_one - org123",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream","publish_one",
+               "--nats.user","god@sg","--nats.pass","god",
+               "--subject","org1234.write.props.github",
+ 
+
+             ]    
+        },
+        {
+            "name": "callout/services/url_resolver",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "callout", "services","url_resolver",
+                "--operator.nk", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/operator.nk",
+                "--auth.account.jwt", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/auth.account.jwt",
+                "--system.account.jwt", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/system.account.jwt",
+             ]    
+        },
+        {
+            "name": "callout/services/operator_mode_url_resolver",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "callout", "services","operator_mode_url_resolver",
+                "--users.file", "${workspaceFolder}/configs/users.json",
+                "--callout.creds", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/service.creds",
+                "--callout.issuer.nk", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/C.nk",
+              ]    
+        },
+        {
+            "name": "jetstream/consume with creds",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream", "consume", 
+                "--js.name","my_stream", 
+                "--consumer.name","con_my_stream", 
+                "--nats.user","god@sg","--nats.pass","god",                
+                "--sentinel.creds", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/sentinel.creds",
+              ]    
+        },
+        {
+            "name": "jetstream/publish_one with creds",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "jetstream", "publish_one", 
+                "--nats.user","god@sg","--nats.pass","god",                
+                "--sentinel.creds", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/sentinel.creds",
+                "--subject","my_stream.a.b",
+              ]    
+        }
+
+
+    ]
+}
+ 
