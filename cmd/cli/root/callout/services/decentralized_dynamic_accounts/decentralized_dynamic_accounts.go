@@ -16,7 +16,7 @@ import (
 	contracts_nats "github.com/nats-io-custom/nats-jetstream-issue/internal/contracts/nats"
 	contracts_users "github.com/nats-io-custom/nats-jetstream-issue/internal/contracts/users"
 	services_account_store_golang_db "github.com/nats-io-custom/nats-jetstream-issue/internal/services/account_store/golang_db"
-	services_user_strore_inmemory "github.com/nats-io-custom/nats-jetstream-issue/internal/services/user_store/inmemory"
+	services_user_store_inmemory "github.com/nats-io-custom/nats-jetstream-issue/internal/services/user_store/inmemory"
 	shared "github.com/nats-io-custom/nats-jetstream-issue/internal/shared"
 	jwt "github.com/nats-io/jwt/v2"
 	nats "github.com/nats-io/nats.go"
@@ -91,7 +91,7 @@ func Init(parentCmd *cobra.Command) {
 					OperatorNKey:     seed,
 				})
 
-			services_user_strore_inmemory.AddSingletonUserStore(builder)
+			services_user_store_inmemory.AddSingletonUserStore(builder)
 			services_account_store_golang_db.AddSingletonAccountStore(builder)
 			ctn := builder.Build()
 
@@ -100,16 +100,6 @@ func Init(parentCmd *cobra.Command) {
 				log.Error().Err(err).Msg("failed to get account store")
 				return err
 			}
-			accountStore.AddAccountByJWT(ctx,
-				&contracts_nats.AddAccountByJWTRequest{
-					Name: "auth",
-					JWT:  string(authAccountJWT),
-				})
-			accountStore.AddAccountByJWT(ctx,
-				&contracts_nats.AddAccountByJWTRequest{
-					Name: "system",
-					JWT:  string(systemAccountJWT),
-				})
 
 			userStore, err := di.TryGet[contracts_users.IUserStore](ctn)
 			if err != nil {

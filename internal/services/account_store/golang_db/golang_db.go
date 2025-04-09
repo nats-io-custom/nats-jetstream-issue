@@ -14,6 +14,7 @@ import (
 
 	database "github.com/Mahopanda/golang-database/database"
 	di "github.com/fluffy-bunny/fluffy-dozm-di"
+	fluffycore_utils "github.com/fluffy-bunny/fluffycore/utils"
 	status "github.com/gogo/status"
 	contracts_nats "github.com/nats-io-custom/nats-jetstream-issue/internal/contracts/nats"
 	jwt "github.com/nats-io/jwt/v2"
@@ -76,12 +77,27 @@ func (s *service) Ctor(config *contracts_nats.AccountStoreConfig) (contracts_nat
 		return nil, err
 	}
 
-	return &service{
+	svc := &service{
 		config:        config,
 		issuerKeyPair: kp,
 		lockManager:   lockManager,
 		db:            db,
-	}, nil
+	}
+	if fluffycore_utils.IsNotEmptyOrNil(config.SystemAccountJWT) {
+		svc.AddAccountByJWT(context.Background(),
+			&contracts_nats.AddAccountByJWTRequest{
+				Name: "system",
+				JWT:  config.SystemAccountJWT,
+			})
+	}
+	if fluffycore_utils.IsNotEmptyOrNil(config.AuthAccountJWT) {
+		svc.AddAccountByJWT(context.Background(),
+			&contracts_nats.AddAccountByJWTRequest{
+				Name: "auth",
+				JWT:  config.SystemAccountJWT,
+			})
+	}
+	return svc, nil
 }
 func AddSingletonAccountStore(builder di.ContainerBuilder) {
 	di.AddSingleton[contracts_nats.IAccountStore](

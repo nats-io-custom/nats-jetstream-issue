@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	contracts_nats "github.com/nats-io-custom/nats-jetstream-issue/internal/contracts/nats"
-
 	di "github.com/fluffy-bunny/fluffy-dozm-di"
+	fluffycore_utils "github.com/fluffy-bunny/fluffycore/utils"
+	contracts_nats "github.com/nats-io-custom/nats-jetstream-issue/internal/contracts/nats"
 	jwt "github.com/nats-io/jwt/v2"
 	nkeys "github.com/nats-io/nkeys"
 	zerolog "github.com/rs/zerolog"
@@ -38,12 +38,27 @@ func (s *service) Ctor(config *contracts_nats.AccountStoreConfig) (contracts_nat
 		return nil, err
 	}
 
-	return &service{
+	svc := &service{
 		config:                           config,
 		issuerKeyPair:                    kp,
 		accountFriendlyNameToAccountInfo: map[string]*contracts_nats.CreateSimpleAccountResponse{},
 		accountPubKeyToAccountInfo:       map[string]*contracts_nats.CreateSimpleAccountResponse{},
-	}, nil
+	}
+	if fluffycore_utils.IsNotEmptyOrNil(config.SystemAccountJWT) {
+		svc.AddAccountByJWT(context.Background(),
+			&contracts_nats.AddAccountByJWTRequest{
+				Name: "system",
+				JWT:  config.SystemAccountJWT,
+			})
+	}
+	if fluffycore_utils.IsNotEmptyOrNil(config.AuthAccountJWT) {
+		svc.AddAccountByJWT(context.Background(),
+			&contracts_nats.AddAccountByJWTRequest{
+				Name: "auth",
+				JWT:  config.SystemAccountJWT,
+			})
+	}
+	return svc, nil
 }
 func AddSingletonAccountStore(builder di.ContainerBuilder) {
 	di.AddSingleton[contracts_nats.IAccountStore](

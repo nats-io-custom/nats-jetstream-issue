@@ -12,8 +12,11 @@ import (
 
 	shared "github.com/nats-io-custom/nats-jetstream-issue/internal/shared"
 
+	di "github.com/fluffy-bunny/fluffy-dozm-di"
 	fluffycore_utils "github.com/fluffy-bunny/fluffycore/utils"
 	status "github.com/gogo/status"
+	contracts_users "github.com/nats-io-custom/nats-jetstream-issue/internal/contracts/users"
+	services_user_store_inmemory "github.com/nats-io-custom/nats-jetstream-issue/internal/services/user_store/inmemory"
 	jwt "github.com/nats-io/jwt/v2"
 	nkeys "github.com/nats-io/nkeys"
 	zerolog "github.com/rs/zerolog"
@@ -27,7 +30,7 @@ const use = "static"
 
 var (
 	appInputs        = shared.NewInputs()
-	users     string = "./configs/users.json"
+	usersFile string = "./configs/users.json"
 )
 var wellknownAccounts = map[string]string{
 	"svc": "SVC",
@@ -48,6 +51,20 @@ func Init(parentCmd *cobra.Command) {
 			printer.EnableColors = true
 			printer.PrintBold(cobra_utils.Bold, use)
 
+			builder := di.Builder()
+			di.AddInstance[*contracts_users.UserStoreConfig](builder,
+				&contracts_users.UserStoreConfig{
+					UserFile: usersFile,
+				})
+			services_user_store_inmemory.AddSingletonUserStore(builder)
+			ctn := builder.Build()
+
+			userStore, err := di.TryGet[contracts_users.IUserStore](ctn)
+			if err != nil {
+				log.Error().Err(err).Msg("failed to get user store")
+				return err
+			}
+
 			nc, err := appInputs.MakeConn(ctx)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to connect to nats server")
@@ -65,16 +82,17 @@ func Init(parentCmd *cobra.Command) {
 			akpPublickKey, _ := akp.PublicKey()
 			log.Info().Str("issuer", akpPublickKey).Msg("issuer")
 
-			if !shared.FileExists(users) {
-				log.Error().Str("file", users).Msg("file does not exist")
+			if !shared.FileExists(usersFile) {
+				log.Error().Str("file", usersFile).Msg("file does not exist")
 				return status.Error(codes.Internal, "file does not exist")
 			}
-			usersData, err := shared.LoadUsersData(users)
+			getUsersResponse, err := userStore.GetUsers(ctx)
 			if err != nil {
-				log.Error().Err(err).Msg("error loading users data")
-				return status.Error(codes.Internal, "error loading users data")
+				log.Error().Err(err).Msg("error getting users")
+				return err
 			}
-			printer.Println(cobra_utils.Blue, fluffycore_utils.PrettyJSON(usersData))
+			users := getUsersResponse.Users
+			printer.Println(cobra_utils.Blue, fluffycore_utils.PrettyJSON(users))
 			// Parse the xkey seed if present.
 			var curveKeyPair nkeys.KeyPair
 			if fluffycore_utils.IsNotEmptyOrNil(appInputs.XKeySeed) {
@@ -104,37 +122,19 @@ func Init(parentCmd *cobra.Command) {
 				password := req.ConnectOptions.Password
 
 				printer.Printf(cobra_utils.Blue, "username: %s, password: %s\n", username, password)
-				authenticated := false
-				var user *shared.User
 
-				for _, item := range usersData.Users {
-					if item.Username == username && item.Password == password {
-						authenticated = true
-						user = &item
-						break
-					}
-				}
-				if !authenticated {
-					printer.Printf(cobra_utils.Red, "UNAUTHORIZED: username: %s, password: %s\n", username, password)
-					return "", status.Error(codes.PermissionDenied, "permission denied")
-				}
-				authenticated = false
-				for _, allowedAccount := range user.AllowedAccounts {
-					if allowedAccount == "*" {
-						authenticated = true
-						break
-					}
-					if strings.ToLower(allowedAccount) == accountWanted {
-						authenticated = true
-						break
-					}
+				authenticateUserResponse, err := userStore.AuthenticateUser(ctx,
+					&contracts_users.AuthenticateUserRequest{
+						UserName: username,
+						Password: password,
+						Account:  accountWanted,
+					})
+				if err != nil {
+					log.Error().Err(err).Msg("error authenticating user")
+					return "", err
 				}
 
-				if !authenticated {
-					printer.Printf(cobra_utils.Red, "UNAUTHORIZED: invalid user account: %s\n", username)
-					return "", status.Error(codes.PermissionDenied, "invalid user user account")
-				}
-
+				user := authenticateUserResponse.User
 				audience, ok := wellknownAccounts[accountWanted]
 				if !ok {
 					printer.Printf(cobra_utils.Red, "UNAUTHORIZED: invalid user account: %s\n", username)
@@ -182,8 +182,8 @@ func Init(parentCmd *cobra.Command) {
 	viper.BindPFlag(flagName, command.PersistentFlags().Lookup(flagName))
 
 	flagName = "users.file"
-	defaultS = users
-	command.Flags().StringVar(&users, flagName, defaultS, fmt.Sprintf("[required] i.e. --%s=%s", flagName, defaultS))
+	defaultS = usersFile
+	command.Flags().StringVar(&usersFile, flagName, defaultS, fmt.Sprintf("[required] i.e. --%s=%s", flagName, defaultS))
 	viper.BindPFlag(flagName, command.PersistentFlags().Lookup(flagName))
 
 	parentCmd.AddCommand(command)

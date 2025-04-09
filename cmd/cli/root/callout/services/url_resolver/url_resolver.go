@@ -79,17 +79,6 @@ func Init(parentCmd *cobra.Command) {
 				return err
 			}
 
-			accountStore.AddAccountByJWT(ctx,
-				&contracts_nats.AddAccountByJWTRequest{
-					Name: "auth",
-					JWT:  string(authAccountJWT),
-				})
-			accountStore.AddAccountByJWT(ctx,
-				&contracts_nats.AddAccountByJWTRequest{
-					Name: "system",
-					JWT:  string(systemAccountJWT),
-				})
-
 			for _, wa := range wellknownAccounts {
 				_, err = accountStore.GetAccountByName(ctx,
 					&contracts_nats.GetAccountByNameRequest{
