@@ -7,7 +7,7 @@
 ```bash
 go build .\cmd\cli\.
 
-.\cli.exe callout services static --nats.user auth --nats.pass auth
+ .\cli.exe callout services url_resolver --operator.nk .\configs\dynamic_accounts_url_resolver\operator.nk --auth.account.jwt .\configs\dynamic_accounts_url_resolver\auth.account.jwt --system.account.jwt .\configs\dynamic_accounts_url_resolver\system.account.jwt 
 ```
 
 ## Bring up nats
