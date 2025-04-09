@@ -45,7 +45,7 @@ func (s *service) Ctor(config *contracts_nats.AccountStoreConfig) (contracts_nat
 		accountPubKeyToAccountInfo:       map[string]*contracts_nats.CreateSimpleAccountResponse{},
 	}, nil
 }
-func AddSingletoAccountStore(builder di.ContainerBuilder) {
+func AddSingletonAccountStore(builder di.ContainerBuilder) {
 	di.AddSingleton[contracts_nats.IAccountStore](
 		builder,
 		stemService.Ctor,

@@ -13,7 +13,10 @@ import (
 	echo "github.com/labstack/echo/v4"
 	cobra_utils "github.com/nats-io-custom/nats-jetstream-issue/internal/cobra_utils"
 	contracts_nats "github.com/nats-io-custom/nats-jetstream-issue/internal/contracts/nats"
-	services_account_store_inmemory "github.com/nats-io-custom/nats-jetstream-issue/internal/services/account_store/inmemory"
+
+	//services_account_store_inmemory "github.com/nats-io-custom/nats-jetstream-issue/internal/services/account_store/inmemory"
+	services_account_store_golang_db "github.com/nats-io-custom/nats-jetstream-issue/internal/services/account_store/golang_db"
+
 	shared "github.com/nats-io-custom/nats-jetstream-issue/internal/shared"
 	nkeys "github.com/nats-io/nkeys"
 	zerolog "github.com/rs/zerolog"
@@ -67,7 +70,7 @@ func Init(parentCmd *cobra.Command) {
 					AuthAccountJWT:   string(authAccountJWT),
 					OperatorNKey:     seed,
 				})
-			services_account_store_inmemory.AddSingletoAccountStore(builder)
+			services_account_store_golang_db.AddSingletonAccountStore(builder)
 			ctn := builder.Build()
 			accountStore, err := di.TryGet[contracts_nats.IAccountStore](ctn)
 			if err != nil {

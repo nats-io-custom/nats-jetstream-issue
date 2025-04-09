@@ -3,6 +3,7 @@ module github.com/nats-io-custom/nats-jetstream-issue
 go 1.24.1
 
 require (
+	github.com/Mahopanda/golang-database v0.0.0-20241022050632-a60caadfec9c
 	github.com/fluffy-bunny/fluffy-dozm-di v0.0.3
 	github.com/fluffy-bunny/fluffycore v1.0.183
 	github.com/gogo/status v1.1.1
@@ -31,6 +32,7 @@ require (
 	github.com/google/go-tpm v0.9.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/invopop/jsonschema v0.13.0 // indirect
+	github.com/jcelliott/lumber v0.0.0-20160324203708-dd349441af25 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

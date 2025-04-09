@@ -1,5 +1,17 @@
 # nats-jetstream-issue
 
+The url resolver is using a file based json store to store account.
+it is located in the same folder as the cli.exe called `golang_db`.
+
+The nats-server stores the jetstream data (stream + consumer configs) in a docker temp folder.  
+If you want to start over clean do a
+
+```shell
+docker-compose down -v
+```
+
+You shouldn't need to delete the `golang_db` folder.
+
 ## Bring up the resolver
 
 [code](/cmd/cli/root/callout/services/url_resolver/url_resolver.go)
@@ -7,7 +19,7 @@
 ```bash
 go build .\cmd\cli\.
 
- .\cli.exe callout services url_resolver --operator.nk .\configs\dynamic_accounts_url_resolver\operator.nk --auth.account.jwt .\configs\dynamic_accounts_url_resolver\auth.account.jwt --system.account.jwt .\configs\dynamic_accounts_url_resolver\system.account.jwt 
+ .\cli.exe callout services url_resolver --operator.nk .\configs\dynamic_accounts_url_resolver\operator.nk --auth.account.jwt .\configs\dynamic_accounts_url_resolver\auth.account.jwt --system.account.jwt .\configs\dynamic_accounts_url_resolver\system.account.jwt
 ```
 
 ## Bring up nats
