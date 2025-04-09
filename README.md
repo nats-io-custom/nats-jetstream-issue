@@ -1,5 +1,7 @@
 # nats-jetstream-issue
 
+[nats server issue](https://github.com/nats-io/nats-server/issues/6775)
+
 The url resolver is using a file based json store to store account.
 it is located in the same folder as the cli.exe called `golang_db`.
 
