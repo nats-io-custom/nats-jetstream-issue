@@ -275,6 +275,13 @@ func (s *service) GetAccounts(ctx context.Context) (*contracts_nats.GetAccountsR
 func (s *service) RefreshJWT(ctx context.Context, request *contracts_nats.RefreshJWTRequest) (*contracts_nats.RefreshJWTResponse, error) {
 
 	log := zerolog.Ctx(ctx).With().Interface("request", request).Logger()
+	switch request.AccountInfo.Name {
+	case "system", "auth":
+		// these are forever
+		return &contracts_nats.RefreshJWTResponse{
+			AccountInfo: request.AccountInfo,
+		}, nil
+	}
 
 	request.AccountInfo.AccountClaims.Expires = time.Now().Add(time.Minute * 2).Unix()
 

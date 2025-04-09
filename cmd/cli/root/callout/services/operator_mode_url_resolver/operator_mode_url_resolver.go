@@ -13,10 +13,12 @@ import (
 	"syscall"
 	"time"
 
+	di "github.com/fluffy-bunny/fluffy-dozm-di"
 	fluffycore_utils "github.com/fluffy-bunny/fluffycore/utils"
-	status "github.com/gogo/status"
 	cobra_utils "github.com/nats-io-custom/nats-jetstream-issue/internal/cobra_utils"
 	contracts_nats "github.com/nats-io-custom/nats-jetstream-issue/internal/contracts/nats"
+	contracts_users "github.com/nats-io-custom/nats-jetstream-issue/internal/contracts/users"
+	services_user_strore_inmemory "github.com/nats-io-custom/nats-jetstream-issue/internal/services/user_store/inmemory"
 	shared "github.com/nats-io-custom/nats-jetstream-issue/internal/shared"
 	jwt "github.com/nats-io/jwt/v2"
 	nats "github.com/nats-io/nats.go"
@@ -25,14 +27,13 @@ import (
 	cobra "github.com/spf13/cobra"
 	viper "github.com/spf13/viper"
 	callout "github.com/synadia-io/callout.go"
-	codes "google.golang.org/grpc/codes"
 )
 
 const use = "operator_mode_url_resolver"
 
 var (
 	appInputs       = shared.NewInputs()
-	users           = "./configs/users.json"
+	usersFile       = "./configs/users.json"
 	urlResolverPort = 4299
 )
 
@@ -58,24 +59,25 @@ func Init(parentCmd *cobra.Command) {
 			printer.EnableColors = true
 			printer.PrintBold(cobra_utils.Bold, use)
 
+			builder := di.Builder()
+
+			di.AddInstance[*contracts_users.UserStoreConfig](builder,
+				&contracts_users.UserStoreConfig{
+					UserFile: usersFile,
+				})
+			services_user_strore_inmemory.AddSingletonUserStore(builder)
+			ctn := builder.Build()
+
+			userStore, err := di.TryGet[contracts_users.IUserStore](ctn)
+			if err != nil {
+				log.Error().Err(err).Msg("failed to get user store")
+				return err
+			}
+
 			accountFetchUrlRoot := fmt.Sprintf("http://localhost:%d/jwt/v1/accounts/name/", urlResolverPort)
 
-			if !shared.FileExists(users) {
-				log.Error().Str("file", users).Msg("file does not exist")
-				return status.Error(codes.Internal, "file does not exist")
-			}
-			usersData, err := shared.LoadUsersData(users)
-			if err != nil {
-				log.Error().Err(err).Msg("error loading users data")
-				return status.Error(codes.Internal, "error loading users data")
-			}
-			for idx := range usersData.Users {
-				usersData.Users[idx].Username = strings.ToLower(usersData.Users[idx].Username)
-				for aid := range usersData.Users[idx].AllowedAccounts {
-					usersData.Users[idx].AllowedAccounts[aid] = strings.ToLower(usersData.Users[idx].AllowedAccounts[aid])
-				}
-			}
-			printer.Println(cobra_utils.Blue, fluffycore_utils.PrettyJSON(usersData))
+			getUsersResponse, err := userStore.GetUsers(ctx)
+			printer.Println(cobra_utils.Blue, fluffycore_utils.PrettyJSON(getUsersResponse))
 
 			// this creates a new account named as specified returning
 			// the key used to sign users
@@ -127,27 +129,19 @@ func Init(parentCmd *cobra.Command) {
 					UserPassword: password,
 				}
 				log := log.With().Interface("accountUser", accountUser).Logger()
-				isUserAllowed := func() (*shared.User, error) {
-					for _, user := range usersData.Users {
-						if user.Username == username {
-							for _, account := range user.AllowedAccounts {
-								if account == "*" {
-									return &user, nil
-								}
-								if account == accountUser.AccountName {
-									return &user, nil
-								}
-							}
-						}
-					}
-					return nil, status.Error(codes.Unauthenticated, "user not found or not allowed")
-				}
-				user, err := isUserAllowed()
+
+				authenticateUserResponse, err := userStore.AuthenticateUser(ctx,
+					&contracts_users.AuthenticateUserRequest{
+						UserName: accountUser.UserName,
+						Password: accountUser.UserPassword,
+						Account:  accountUser.AccountName,
+					})
+
 				if err != nil {
 					log.Error().Err(err).Msg("user not allowed")
 					return "", err
 				}
-
+				user := authenticateUserResponse.User
 				// see if we have this account
 				createSimpleAccountResponse, err := getOrCreateAccount(accountUser.AccountName)
 				if err != nil {
@@ -201,8 +195,8 @@ func Init(parentCmd *cobra.Command) {
 	shared.InitCommonConnFlags(appInputs, command)
 
 	flagName := "users.file"
-	defaultS := users
-	command.Flags().StringVar(&users, flagName, defaultS, fmt.Sprintf("[required] i.e. --%s=%s", flagName, defaultS))
+	defaultS := usersFile
+	command.Flags().StringVar(&usersFile, flagName, defaultS, fmt.Sprintf("[required] i.e. --%s=%s", flagName, defaultS))
 	viper.BindPFlag(flagName, command.PersistentFlags().Lookup(flagName))
 
 	flagName = "callout.issuer.nk"

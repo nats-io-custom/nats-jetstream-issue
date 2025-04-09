@@ -48,8 +48,6 @@ func Init(parentCmd *cobra.Command) {
 			printer.EnableColors = true
 			printer.PrintBold(cobra_utils.Bold, use)
 
-			builder := di.Builder()
-
 			authAccountJWT, err := os.ReadFile(appInputs.AuthAccountJWTFile)
 			if err != nil {
 				return err
@@ -64,14 +62,17 @@ func Init(parentCmd *cobra.Command) {
 				return err
 			}
 			seed, _ := okp.Seed()
+			builder := di.Builder()
 			di.AddInstance[*contracts_nats.AccountStoreConfig](builder,
 				&contracts_nats.AccountStoreConfig{
 					SystemAccountJWT: string(systemAccountJWT),
 					AuthAccountJWT:   string(authAccountJWT),
 					OperatorNKey:     seed,
 				})
+
 			services_account_store_golang_db.AddSingletonAccountStore(builder)
 			ctn := builder.Build()
+
 			accountStore, err := di.TryGet[contracts_nats.IAccountStore](ctn)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to get account store")

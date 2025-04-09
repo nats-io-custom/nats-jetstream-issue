@@ -1,6 +1,7 @@
 package services
 
 import (
+	callout_services_decentralized_dynamic_accounts "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/callout/services/decentralized_dynamic_accounts"
 	callout_services_operator_mode_url_resolver "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/callout/services/operator_mode_url_resolver"
 	callout_services_static "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/callout/services/static"
 	callout_services_url_resolver "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/callout/services/url_resolver"
@@ -21,6 +22,7 @@ func Init(parentCmd *cobra.Command) {
 	callout_services_static.Init(command)
 	callout_services_url_resolver.Init(command)
 	callout_services_operator_mode_url_resolver.Init(command)
+	callout_services_decentralized_dynamic_accounts.Init(command)
 
 	parentCmd.AddCommand(command)
 

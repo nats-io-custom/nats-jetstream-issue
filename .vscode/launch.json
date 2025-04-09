@@ -198,9 +198,31 @@
                 "--sentinel.creds", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/sentinel.creds",
                 "--subject","my_stream.a.b",
               ]    
+        },
+        {
+            "name": "callout/services/decentralized_dynamic_accounts",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli",
+            "console": "externalTerminal",
+            "args": [ 
+                "callout", "services","decentralized_dynamic_accounts",
+                "--users.file", "${workspaceFolder}/configs/users.json",
+                "--callout.creds", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/service.creds",
+                "--callout.issuer.nk", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/C.nk",
+                "--sys.creds", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/sys.creds",
+                "--auth.account.jwt", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/auth.account.jwt",
+                "--system.account.jwt", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/system.account.jwt",
+                "--operator.nk", "${workspaceFolder}/configs/dynamic_accounts_url_resolver/operator.nk",
+
+              ]    
         }
 
 
     ]
 }
  
+
+
+
