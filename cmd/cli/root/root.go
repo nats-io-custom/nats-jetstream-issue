@@ -8,12 +8,11 @@ import (
 	"os"
 
 	callout "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/callout"
-	shared "github.com/nats-io-custom/nats-jetstream-issue/internal/shared"
-
 	clients "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/clients"
+	core "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/core"
 	handlers "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/handlers"
 	jetstream "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/jetstream"
-
+	shared "github.com/nats-io-custom/nats-jetstream-issue/internal/shared"
 	zerolog "github.com/rs/zerolog"
 	cobra "github.com/spf13/cobra"
 )
@@ -61,5 +60,6 @@ func InitRootCmd() *cobra.Command {
 	handlers.Init(command)
 	clients.Init(command)
 	jetstream.Init(command)
+	core.Init(command)
 	return command
 }
