@@ -2,6 +2,7 @@ package core
 
 import (
 	core_publish "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/core/publish"
+	core_subscribe_async "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/core/subscribe_async"
 	core_subscribe_sync "github.com/nats-io-custom/nats-jetstream-issue/cmd/cli/root/core/subscribe_sync"
 	cobra_utils "github.com/nats-io-custom/nats-jetstream-issue/internal/cobra_utils"
 	cobra "github.com/spf13/cobra"
@@ -19,6 +20,7 @@ func Init(parentCmd *cobra.Command) {
 
 	core_publish.Init(command)
 	core_subscribe_sync.Init(command)
+	core_subscribe_async.Init(command)
 
 	parentCmd.AddCommand(command)
 
