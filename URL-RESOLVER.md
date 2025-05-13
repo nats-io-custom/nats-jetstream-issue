@@ -2,6 +2,20 @@
 
 ## URL-RESOLVER Operator Mode
 
+Instructions for creating the configs and creds.
+
+1. Run Bash in vscode
+2. run the ./generate.sh script
+   This will create all the files and creates a sentinel.creds file with a jwt that has the BearerToken == true in it. This is whats needed for the default_sentinel feature.
+3.
+4. Move the temp folder to somewhere you can work with it. `mv /tmp/DA/ Herb_temp`
+
+In the Herb_temp/jwt folder is a {{pubkey}}.jwt which is your [auth.account.jwt](./configs/dynamic_accounts_url_resolver/auth.account.jwt)
+
+In the herb_temp/data/stores/O folder are where you will find all the other jwts you will need.
+
+the sentinel.jwt is used in this [server.conf](./configs/dynamic_accounts_url_resolver/server.url.resolver.conf)
+
 [nats server issue](https://github.com/nats-io/nats-server/issues/6775)
 
 The url resolver is using a file based json store to store account.
@@ -149,3 +163,5 @@ PS C:\work\nats-io-custom\nats-jetstream-issue>
 I have observed the following behavior as well. If you publish under heavy sustained load, it seems that nats keeps that account and jetstream in good standings.
 
 Under no load the expration causes the issue and then you can't publish or consume anymore.
+
+ABWTVME4EY6EHPMCGU6GJTHTWYHY7N3BDV6FUOLXDUDHDIMXVON7IL43

@@ -1,7 +1,8 @@
 services:
   # Internal NATS server.
   server:
-    image: nats:2.11.0
+    image: nats:2.11.3
+    #image: ghstahl/nats:sha-b7f5ecb6
     command:
       -n internal-server
       -m 8222
