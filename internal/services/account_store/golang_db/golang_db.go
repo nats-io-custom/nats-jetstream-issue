@@ -94,7 +94,7 @@ func (s *service) Ctor(config *contracts_nats.AccountStoreConfig) (contracts_nat
 		svc.AddAccountByJWT(context.Background(),
 			&contracts_nats.AddAccountByJWTRequest{
 				Name: "auth",
-				JWT:  config.SystemAccountJWT,
+				JWT:  config.AuthAccountJWT,
 			})
 	}
 	return svc, nil
