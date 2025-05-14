@@ -16,6 +16,49 @@ In the herb_temp/data/stores/O folder are where you will find all the other jwts
 
 the sentinel.jwt is used in this [server.conf](./configs/dynamic_accounts_url_resolver/server.url.resolver.conf)
 
+## Parts
+
+### Account Resolver
+
+The account resolve returns account JWT(s) based on the JWT's PublicKey. It requires the 2 JWT(s) created by nsc: The system.jwt and the auth callout jwt. It also needs the NKey to sign the dynamic accounts.
+
+When nats-server asks for an account, the auth and system accounts are served from memory and the rest are served by getting the account information from a database and minting an account.
+
+In summary, 3 things:
+a. Signing nkey (secret)
+b. Auth.Account.JWT
+c. System.Account.JWT
+
+All can be strings.
+
+### Nats Server
+
+The server config is simple.
+
+The sentinel JWT can be harvested out of the sentinel.creds file.
+
+The `resolver` points to the standalone HTTP Server.
+
+The rest is created by the generate script.
+
+```yaml
+default_sentinel: eyJ0eXAiOiJKV1QiLCJhbGciOiJlZDI1NTE5LW5rZXkifQ.eyJqdGkiOiJBMjZPTlJRWkRHWU1TVzNWRFlRQkhGRllHTlZNUTdPR0RIRlRIUldLRzRPRDRPSFFNWDJBIiwiaWF0IjoxNzQ3MTczNzgyLCJpc3MiOiJBQTZXRjRNNDNOU0NRTURSS1ZQTFhDVTNXVVY0VVJFWjRRRzdUNTI3UVBONlNQUTVTVkM2TklPVSIsIm5hbWUiOiJzZW50aW5lbCIsInN1YiI6IlVERzM1WktZSkJHQzU2VFdYWlROM0JCSU5TTENISTVRQlNaR0ozWVBGQldKRkMzQlVOQTU1QllRIiwibmF0cyI6eyJwdWIiOnsiZGVueSI6WyJcdTAwM2UiXX0sInN1YiI6eyJkZW55IjpbIlx1MDAzZSJdfSwic3VicyI6LTEsImRhdGEiOi0xLCJwYXlsb2FkIjotMSwiYmVhcmVyX3Rva2VuIjp0cnVlLCJ0eXBlIjoidXNlciIsInZlcnNpb24iOjJ9fQ.UuRh8Hwl6tqxMnYQSDi_NVJmaM54VRTS5BZ9-ohzct1Ccp9ybj1PO_hI5c6chPUcb_J9o2jT9J8YrEy4iUn1Ag
+# Operator named O
+operator: eyJ0eXAiOiJKV1QiLCJhbGciOiJlZDI1NTE5LW5rZXkifQ.eyJqdGkiOiJXWVpMS1FFS1VMRkRCSVNPQkVYWEEyT05WVVdJR1NGVlg1RTRVMjNMRkJYS01ZN1BMVktBIiwiaWF0IjoxNzQ3MTczNzgyLCJpc3MiOiJPQUlZS01RTkFFSUdRRk5PVVVOMlNOWTNXNklHM080UkVVU1pFRFFMVkUzQlVOSUdaS0FZWkIyVSIsIm5hbWUiOiJPIiwic3ViIjoiT0FJWUtNUU5BRUlHUUZOT1VVTjJTTlkzVzZJRzNPNFJFVVNaRURRTFZFM0JVTklHWktBWVpCMlUiLCJuYXRzIjp7InN5c3RlbV9hY2NvdW50IjoiQURRWlNRRlBHVlNaRkdKSEZGQUkzUjJYM0tPN0NaM1RFTVVIMkNNREdPNlBJSkJKRVpNWklWTUgiLCJ0eXBlIjoib3BlcmF0b3IiLCJ2ZXJzaW9uIjoyfX0.s3oqfv2du37EdUX6dWAkL9GMEpcnCIqWyaj8zidOZLCWQna1GRJTVSNVKFG30Fq2QSCXcOpOCJ4xM59BCokABA
+# System Account named SYS
+system_account: ADQZSQFPGVSZFGJHFFAI3R2X3KO7CZ3TEMUH2CMDGO6PIJBJEZMZIVMH
+
+# configuration of the nats based resolver
+resolver: URL(http://host.docker.internal:4299/jwt/v1/accounts/id/)
+```
+
+### AuthCallout
+
+The app needs the callout.creds to talk to nats and the signing key to sign the users.  
+Both are secrets.
+
+## Tests
+
 [nats server issue](https://github.com/nats-io/nats-server/issues/6775)
 
 The url resolver is using a file based json store to store account.
@@ -37,7 +80,7 @@ You shouldn't need to delete the `golang_db` folder.
 ```bash
 go build .\cmd\cli\.
 
- .\cli.exe callout services url_resolver --operator.nk .\configs\dynamic_accounts_url_resolver\operator.nk --auth.account.jwt .\configs\dynamic_accounts_url_resolver\auth.account.jwt --system.account.jwt .\configs\dynamic_accounts_url_resolver\system.account.jwt
+.\cli.exe callout services url_resolver --operator.nk .\configs\dynamic_accounts_url_resolver\operator.nk --auth.account.jwt .\configs\dynamic_accounts_url_resolver\auth.account.jwt --system.account.jwt .\configs\dynamic_accounts_url_resolver\system.account.jwt
 ```
 
 ### Bring up nats
